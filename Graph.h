@@ -1,17 +1,28 @@
+#ifndef GRAPH_H
+#define GRAPH_H
 #include <iostream>
-
+#include <vector>
+#include "Vertex.h"
 using namespace std;
 
 class Graph
 {
 private:
-    short int id;
-    int degree;
-    
+    vector<vector<Vertex*>> vertices;
+    float maxProbSum = 0;
 public:
-    Graph(short int id, int degree);
-    void setId(short int id);
-    short int getId();
+    Graph();
+    Graph(int nbreVertex); //Graph constructor for question 1
+    void setVertices(vector<vector<Vertex*>> vertices);
+    vector< vector<Vertex*> > getVertices();
     void showGraph();
+    void addVertex(Vertex* neighborVertex);
+    float returnRandomProbability(int VertexId);
+    void updateMAxProbSum();
+    int getDegree(int VertexId);
+    int getMAxProbSym();
+    void setMaxProbSum(float newSum);
+    Vertex* addEdgesToGrpah(int nbreVerte, float probablity);
     ~Graph();
 };
+#endif
