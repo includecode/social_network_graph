@@ -9,7 +9,7 @@ class Graph
 {
 private:
     vector<vector<Vertex*>> vertices;
-    float maxProbSum = 0;
+    float sumOfDegrees = 0; //store's the sum of vertices degrees
 public:
     Graph();
     Graph(int nbreVertex); //Graph constructor for question 1
@@ -17,12 +17,15 @@ public:
     vector< vector<Vertex*> > getVertices();
     void showGraph();
     void addVertex(Vertex* neighborVertex);
-    float returnRandomProbability(int VertexId);
-    void updateMAxProbSum();
+    float returnProbability(int VertexId);
+    void updateSumOfDegrees();
     int getDegree(int VertexId);
-    int getMAxProbSym();
-    void setMaxProbSum(float newSum);
-    Vertex* addEdgesToGrpah(int nbreVerte, float probablity);
+    int getSumOfDegrees();
+    void setSumOfDegrees(float newSum);
+    void showAllProbabilities();
+    void updateAllProbabilities();
+    void addEdgesToGrpah(int nbreVerte, float probablity); // Question 1
+    Vertex* chooseNextVertex();                            // Question 2
     ~Graph();
 };
 #endif

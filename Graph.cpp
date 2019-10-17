@@ -14,11 +14,11 @@ Graph::Graph()
     vector<Vertex *> baseNeighbor3;
 
     //Creating base vertices
-    Vertex *v1 = new Vertex(1, Graph::returnRandomProbability(1));
-    Vertex *v2 = new Vertex(2, Graph::returnRandomProbability(2));
-    Vertex *v3 = new Vertex(3, Graph::returnRandomProbability(3));
+    Vertex *v1 = new Vertex(1);
+    Vertex *v2 = new Vertex(2);
+    Vertex *v3 = new Vertex(3);
 
-    //Base Vertex* ID = 1
+    //Base Vertex ID = 1
     baseNeighbor1.push_back(v1); //Vertex's itself is the first element of the list
     baseNeighbor1.push_back(v2); //Neighbor of 1
     baseNeighbor1.push_back(v3); //Neighbor of 1
@@ -37,7 +37,12 @@ Graph::Graph()
     baseVertices.push_back(baseNeighbor3);
 
     this->vertices = baseVertices;
-    this->updateMAxProbSum();
+    this->updateSumOfDegrees();
+    this->updateAllProbabilities();
+
+    v1->setProbability(this->returnProbability(v1->getId()));
+    v2->setProbability(this->returnProbability(v2->getId()));
+    v3->setProbability(this->returnProbability(v3->getId()));
 }
 
 /**
@@ -52,7 +57,7 @@ Graph::Graph(int nbreVertex)
         vector<Vertex *> nextVertex;
 
         //Creating base vertices
-        Vertex *v1 = new Vertex(i + 1, Graph::returnRandomProbability(i + 1));
+        Vertex *v1 = new Vertex(i + 1);
 
         //Base Vertex* ID = 1
         nextVertex.push_back(v1);
@@ -63,72 +68,76 @@ Graph::Graph(int nbreVertex)
     cout << "A Graph of " << nbreVertex << " Vertices has been created" << endl;
 }
 
-/**
- * Given n graphes and a given probability p, this function adds adges to a graph according to the probability
+/** ALGO 1
+ * Given n Vertices and a given probability p, this function adds adges to a graph according to the probability
  */
-Vertex *Graph::addEdgesToGrpah(int nbreVertex, float probablity)
+void Graph::addEdgesToGrpah(int nbreVertex, float probablity)
 {
-    Graph *newGraph = new Graph(nbreVertex);
     for (int i = 0; i < nbreVertex; i++)
     {
         Vertex *currentVertex = this->vertices.at(i).at(0);
-        for (int j = i+1; j < nbreVertex; j++)
+        for (int j = i + 1; j < nbreVertex; j++)
         {
-            //Generate a randon number between 1 and maxProbSum
+            //Generate a randon number between 1 and 100
             int rander = rand() % 100 + 1;
-            if(rander >= 0 && rander <= (probablity * 100) ){
+            if (rander >= 0 && rander <= (probablity * 100))
+            {
                 this->vertices.at(i).push_back(this->vertices.at(j).at(0));
                 this->vertices.at(j).push_back(this->vertices.at(i).at(0));
             }
         }
     }
+}
 
-    /*
-    //We need to sort the vertices according to thier respective probabilities, and store them in a temporary array (Vector)
-    //So that we can easily  make the correspondance with the randon number and the choosen Vertex
-
-    int nbreVertex = this->vertices.size();
-    vector<Vertex *> sortedProbsOfEachVertex;
-
-    //We make a copy of the graph's vertices
-    for (int i = 0; i < this->vertices.size(); i++)
-    {
-        sortedProbsOfEachVertex.push_back(this->vertices.at(i).at(0));
-    }
-    std::sort(sortedProbsOfEachVertex.begin(), sortedProbsOfEachVertex.end());
-
-    //Generate a randon number between 1 and maxProbSum
-    int rander = rand() % ((int)this->getMAxProbSym()) + 1;
-
+/**
+ * Given n vertices, the probabilty to add a new Vertex to any of the vertices is deg(v)/sum(deg(all_vertices))
+ */
+Vertex *Graph::chooseNextVertex()
+{
+    //Generate a randon number between 1 and 100
+    int rander = rand() % 100 + 1;
+    cout << "rander = " << rander << endl;
     //Idea:
-    //1. genarate a number between 1 and the maxProb
+    //1. genarate a number between 1 and the 100
     //2. to pick the choosen Vertex, divide the generated as following example: for a sorted Graph of two vertices of probabilities 0.3 (=30) and 0.7 (=70)... if the
     //generated number R is between 1 and 30 then choosen VErtex is the first of the vector (1 or A), if R is between 30 and 100 then the choosen Vertex is the second of th list...
 
-    int pivot = 0; // This pivot will compute all the ranges successively
+    float pivot = 1.f; // This pivot will compute all the ranges successively
     Vertex *choosen = NULL;
     int i = 0;
-    while (pivot <= rander)
+    while (choosen == NULL)
     {
-        if (((int)sortedProbsOfEachVertex.at(0)->getProbability() >= pivot) && ((int)sortedProbsOfEachVertex.at(0)->getProbability()) < ((int)this->getMAxProbSym() - (int)sortedProbsOfEachVertex.at(0)->getProbability())   )
+
+        /* cout <<"pivot  est "<<pivot<<endl;
+            cout <<"probabilite de "<< sortedProbsOfEachVertex.at(i)->getId()<<"est " <<sortedProbsOfEachVertex.at(i)->getProbability() * 100<<endl;
+            cout <<"at  est "<<sortedProbsOfEachVertex.at(i)->getProbability() * 100 + pivot<<endl;
+            cout <<"FIRST comp de  "<<rander<<" et "<<pivot<<endl;
+            cout <<"SEC comp de  "<<rander<<" et "<<pivot + sortedProbsOfEachVertex.at(i)->getProbability() * 100<<endl;
+        */
+        if (rander >= pivot && rander <= pivot + this->vertices.at(i).at(0)->getProbability() * 100)
         {
-            choosen = sortedProbsOfEachVertex.at(i);
-            break;
-        }else
-        {
-            pivot = pivot + (int)sortedProbsOfEachVertex.at(0)->getProbability();
+            choosen = this->vertices.at(i).at(0);
+            if (choosen->getMAxCountNewEdges() >= 2){
+                choosen = NULL; // m = 2 (enoncé Barabàsi-Albert)
+                rander = rand() % 100 + 1; // rand a new number
+                i=0;  //restart all over
+                pivot = 1.f; //restart all over
+            }
+            else
+                break;
         }
-        
-        i++;
-    }*/
-    Vertex *choosen = NULL;
+        else
+        {
+            pivot = pivot + this->vertices.at(i).at(0)->getProbability() * 100;
+            i++;
+        }
+    }
     return choosen;
 }
-
-float Graph::returnRandomProbability(int VertexId)
+float Graph::returnProbability(int VertexId)
 {
+    float prob = (float)this->getDegree(VertexId) / (float)this->getSumOfDegrees();
 
-    float prob = ((float)rand() / RAND_MAX) - 0.001;
     std::cout << "Pr(" << VertexId << ") is : " << prob << endl;
     //a bigger number divided by a lesser one is always >0 and <1
 
@@ -166,13 +175,22 @@ void Graph::addVertex(Vertex *neighborVertex)
     {
         vector<Vertex *> newVertex;
 
-        Vertex *currentNew = new Vertex(vertices.size() + 1, Graph::returnRandomProbability(vertices.size() + 1)); //Create the vertex
-        newVertex.push_back(currentNew);                                                                           // Set current vertex as main (index 0)
-        newVertex.push_back(neighborVertex);                                                                       //Set the new Vertex's neigbor
-        this->vertices.push_back(newVertex);                                                                       // Add a new Vertex to the Graph
+        Vertex *currentNew = new Vertex(vertices.size() + 1); //Create the vertex
+        newVertex.push_back(currentNew);                      // Set current vertex as main (index 0)
+        newVertex.push_back(neighborVertex);                  //Set the new Vertex's neigbor
+        this->vertices.push_back(newVertex);                  // Add a new Vertex to the Graph
 
         this->vertices.at(neighborVertex->getId() - 1).push_back(currentNew); // set the new Vertex as someone's neighbor
-        this->updateMAxProbSum();                                             //Update the Graph's maxSum
+        this->updateSumOfDegrees();                                           //Update the Graph's maxSum
+        this->updateAllProbabilities();
+
+        //Recompute probalities of each of vertices we are working on
+        this->vertices.at(neighborVertex->getId() - 1).at(0)->setProbability(this->returnProbability(neighborVertex->getId()));
+        currentNew->setProbability(this->returnProbability(currentNew->getId()));
+
+        this->vertices.at(neighborVertex->getId() - 1).at(0)->setMAxCountNewEdges(this->vertices.at(neighborVertex->getId() - 1).at(0)->getMAxCountNewEdges() + 1);
+        currentNew->setMAxCountNewEdges(currentNew->getMAxCountNewEdges() + 1);
+
         std::cout << "A new Vertex* has been added ID is : " << this->vertices.size() << endl;
     }
     else
@@ -197,22 +215,41 @@ void Graph::setVertices(vector<vector<Vertex *>> vertices)
  * Updates the sum of vertex probabilities
  * 
 */
-void Graph::updateMAxProbSum()
+void Graph::updateSumOfDegrees()
 {
+    this->sumOfDegrees = 0;
     for (int i = 0; i < this->vertices.size(); i++)
     {
-        this->maxProbSum += (this->vertices.at(i).at(0)->getProbability() * 100);
+        this->sumOfDegrees += (this->getDegree(this->vertices.at(i).at(0)->getId()));
     }
+}
+void Graph::showAllProbabilities()
+{
+    cout << "--Displaying probabilities--" << endl;
+    for (int i = 0; i < this->vertices.size(); i++)
+    {
+        cout << "Pr(" << this->vertices.at(i).at(0)->getId() << ") = " << this->vertices.at(i).at(0)->getProbability() << endl;
+    }
+}
+
+void Graph::updateAllProbabilities()
+{
+
+    for (int i = 0; i < this->vertices.size(); i++)
+    {
+        this->vertices.at(i).at(0)->setProbability(this->returnProbability(this->vertices.at(i).at(0)->getId()));
+    }
+    cout << "--All Probabilities updated--" << endl;
 }
 vector<vector<Vertex *>> Graph::getVertices()
 {
     return this->vertices;
 }
-int Graph::getMAxProbSym()
+int Graph::getSumOfDegrees()
 {
-    return this->maxProbSum;
+    return this->sumOfDegrees;
 }
-void Graph::setMaxProbSum(float newSum)
+void Graph::setSumOfDegrees(float newSum)
 {
-    this->maxProbSum = newSum;
+    this->sumOfDegrees = newSum;
 }

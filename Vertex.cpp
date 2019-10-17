@@ -3,10 +3,11 @@
 #include <random>
 #include "Vertex.h"
 using namespace std;
-Vertex::Vertex(int id, float probability)
+
+Vertex::Vertex(int id)
 {
     this->id = id;
-    this->probability = probability;
+    this->countNewEdges = 0;
 }
 void Vertex::setId(int id)
 {
@@ -23,4 +24,10 @@ int Vertex::getId()
 float Vertex::getProbability()
 {
     return this->probability;
+}
+void Vertex::setMAxCountNewEdges(int newCount){
+    this->countNewEdges = newCount;
+}
+int Vertex::getMAxCountNewEdges(){
+    return this->countNewEdges;
 }

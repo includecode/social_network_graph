@@ -8,12 +8,16 @@ class Vertex
 private:
     int id;
     float probability;
+    int countNewEdges; //Compteur de nouvelles arretes ajoutées au noeeud (MAX m =2)
+
 public:
-    Vertex(int id, float probability);
+    Vertex(int id);
     void setId(int id);
     void setProbability(float probability);
     int getId();
     float getProbability();
+    int getMAxCountNewEdges();
+    void setMAxCountNewEdges(int newCount);
     ~Vertex();
 };
 #endif
