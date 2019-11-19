@@ -26,6 +26,16 @@ public:
     void updateAllProbabilities();
     void addEdgesToGrpah(int nbreVerte, float probablity); // Question 1
     Vertex* chooseNextVertex();                            // Question 2
+
+    //Bron Kerbosch
+    vector<Vertex> returnNeighbors(int vertexIndex);
+    void bronKerboschStandard(vector<Vertex> *R, vector<Vertex> *P, vector<Vertex> *X, int k, int s);
+    void myUnion(Vertex v, vector<Vertex> *N);
+    void myIntersect(vector<Vertex> *setA, vector<Vertex> setB);
+
+    //Degenerescence
+    vector<Vertex> returnDegeneracyOrder();
+    void eraseNeigbours(int vertexIndex, int neighborID);
     ~Graph();
 };
 #endif

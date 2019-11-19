@@ -8,6 +8,7 @@ Vertex::Vertex(int id)
 {
     this->id = id;
     this->countNewEdges = 0;
+    this->isChoosenInDegeneracy = false;
 }
 void Vertex::setId(int id)
 {
@@ -30,4 +31,12 @@ void Vertex::setMAxCountNewEdges(int newCount){
 }
 int Vertex::getMAxCountNewEdges(){
     return this->countNewEdges;
+}
+bool Vertex::getIsChoosenInDegeneracy(){
+    return this->isChoosenInDegeneracy;
+}
+void Vertex::setIsChoosenInDegeneracy(bool val){
+    this->isChoosenInDegeneracy = val;
+}
+Vertex::~Vertex(){
 }

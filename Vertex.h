@@ -9,6 +9,7 @@ private:
     int id;
     float probability;
     int countNewEdges; //Compteur de nouvelles arretes ajoutées au noeeud (MAX m =2)
+    bool isChoosenInDegeneracy = false;
 
 public:
     Vertex(int id);
@@ -18,6 +19,9 @@ public:
     float getProbability();
     int getMAxCountNewEdges();
     void setMAxCountNewEdges(int newCount);
+    bool getIsChoosenInDegeneracy();
+    void setIsChoosenInDegeneracy(bool val);
+    
     ~Vertex();
 };
 #endif

@@ -117,11 +117,12 @@ Vertex *Graph::chooseNextVertex()
         if (rander >= pivot && rander <= pivot + this->vertices.at(i).at(0)->getProbability() * 100)
         {
             choosen = this->vertices.at(i).at(0);
-            if (choosen->getMAxCountNewEdges() >= 2){
-                choosen = NULL; // m = 2 (enoncé Barabàsi-Albert)
+            if (choosen->getMAxCountNewEdges() >= 2)
+            {
+                choosen = NULL;            // m = 2 (enoncé Barabàsi-Albert)
                 rander = rand() % 100 + 1; // rand a new number
-                i=0;  //restart all over
-                pivot = 1.f; //restart all over
+                i = 0;                     //restart all over
+                pivot = 1.f;               //restart all over
             }
             else
                 break;
@@ -240,6 +241,101 @@ void Graph::updateAllProbabilities()
         this->vertices.at(i).at(0)->setProbability(this->returnProbability(this->vertices.at(i).at(0)->getId()));
     }
     cout << "--All Probabilities updated--" << endl;
+}
+
+//Bron Kerbosch
+void Graph::bronKerboschStandard(vector<Vertex> *R, vector<Vertex> *P, vector<Vertex> *X, int k, int s)
+{
+    if (k < s)
+    {
+        if (P->size() > 0 || X->size() > 0)
+        {
+            int i = k;
+            this->myUnion(P->at(i), R);
+            this->myIntersect(P, this->returnNeighbors(i));
+            this->returnNeighbors(i);
+            this->bronKerboschStandard(R, P, X, k + 1, s);
+            this->myUnion(P->at(i), X);
+            P->erase(P->begin() + i);
+            --k;
+        }
+    }
+}
+void Graph::myUnion(Vertex v, vector<Vertex> *N)
+{
+    N->push_back(v);
+}
+void Graph::myIntersect(vector<Vertex> *setA, vector<Vertex> setB)
+{
+    int x = setA->size();
+    for (int i = 0; i < x; ++i)
+    {
+        Vertex current = setA->at(i);
+        int o = setB.size();
+        for (int j = 0; j < o; ++j)
+        {
+            if (setB.at(j).getId() == current.getId())
+            {
+
+                setA->push_back(setB.at(j));
+            }
+        }
+    }
+}
+
+vector<Vertex> Graph::returnDegeneracyOrder()
+{
+    vector<Vertex> order;
+    int currentkCore = 1; // 1-core
+    int cmpt = 1;
+    int n = 0;
+    int i = 0;
+    while (n < this->vertices.size())
+    {
+        for (int i = 0; i < this->vertices.size(); i++)
+        {
+
+            if (this->returnNeighbors(i).size() - 1 < currentkCore && this->vertices.at(i).at(0)->getIsChoosenInDegeneracy() == false)
+            {
+                order.push_back(*(this->vertices.at(i).at(0)));
+
+                //cout << "smallest is " << this->vertices.at(i).at(0)->getId() << endl;
+                this->vertices.at(i).at(0)->setIsChoosenInDegeneracy(true);
+                n += 1;
+                vector<Vertex> neighbours = this->returnNeighbors(i);
+                for (int j = 0; j < neighbours.size(); j++)
+                {
+                    this->eraseNeigbours(i, neighbours.at(j).getId());
+                    this->eraseNeigbours(neighbours.at(j).getId() -1, i);
+                     //cout <<neighbours.at(j).getId() << "deleted from "<< i+1<<endl;
+                     //cout << i+1 << "deleted from "<< neighbours.at(j).getId()<<endl;
+
+                }
+            }
+        }
+        currentkCore++;
+    }
+
+    return order;
+}
+vector<Vertex> Graph::returnNeighbors(int vertexIndex)
+{
+
+    vector<Vertex> neihgbours;
+    for (int i = 1; i < this->vertices.at(vertexIndex).size(); i++)
+    {
+        neihgbours.push_back(*(this->vertices.at(vertexIndex).at(i)));
+    }
+    return neihgbours;
+}
+
+void Graph::eraseNeigbours(int vertexIndex, int neighborID){
+    for (int i = 1; i < this->vertices.at(vertexIndex).size(); i++)
+    {
+        if(this->vertices.at(vertexIndex).at(i)->getId() == neighborID){
+            this->vertices.at(vertexIndex).erase(this->vertices.at(vertexIndex).begin() + i);
+        }
+    }
 }
 vector<vector<Vertex *>> Graph::getVertices()
 {
